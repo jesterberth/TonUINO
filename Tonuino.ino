@@ -18,7 +18,7 @@
 */
 
 // uncomment the below line to enable five button support
-//#define FIVEBUTTONS
+#define FIVEBUTTONS
 
 static const uint32_t cardCookie = 322417479;
 
@@ -147,9 +147,9 @@ void resetSettings() {
   Serial.println(F("=== resetSettings()"));
   mySettings.cookie = cardCookie;
   mySettings.version = 2;
-  mySettings.maxVolume = 25;
-  mySettings.minVolume = 5;
-  mySettings.initVolume = 15;
+  mySettings.maxVolume = 15;
+  mySettings.minVolume = 1;
+  mySettings.initVolume = 5;
   mySettings.eq = 1;
   mySettings.locked = false;
   mySettings.standbyTimer = 0;
@@ -752,9 +752,11 @@ void setup() {
   // DFPlayer Mini initialisieren
   mp3.begin();
   // Zwei Sekunden warten bis der DFPlayer Mini initialisiert ist
-  delay(2000);
+  delay(1000);
   volume = mySettings.initVolume;
   mp3.setVolume(volume);
+  delay(100); // wird benötigt, damit auch die China-Player funktioneren! 
+
   mp3.setEq(mySettings.eq - 1);
   // Fix für das Problem mit dem Timeout (ist jetzt in Upstream daher nicht mehr nötig!)
   //mySoftwareSerial.setTimeout(10000);
@@ -789,7 +791,7 @@ void setup() {
     loadSettingsFromFlash();
   }
 
-
+ 
   // Start Shortcut "at Startup" - e.g. Welcome Sound
   playShortCut(3);
 }
@@ -858,7 +860,7 @@ void playFolder() {
   Serial.print(numTracksInFolder);
   Serial.print(F(" Dateien in Ordner "));
   Serial.println(myFolder->folder);
-
+  
   // Hörspielmodus: eine zufällige Datei aus dem Ordner
   if (myFolder->mode == 1) {
     Serial.println(F("Hörspielmodus -> zufälligen Track wiedergeben"));
