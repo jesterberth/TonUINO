@@ -5,6 +5,7 @@
 #include <SPI.h>
 #include <SoftwareSerial.h>
 #include <avr/sleep.h>
+#include "TimerOne.h"
 
 /*
    _____         _____ _____ _____ _____
@@ -19,6 +20,7 @@
 
 // uncomment the below line to enable five button support
 #define FIVEBUTTONS
+#define POWERBANKGUARD
 
 static const uint32_t cardCookie = 322417479;
 
@@ -650,6 +652,12 @@ MFRC522::StatusCode status;
 #define buttonFivePin A4
 #endif
 
+#ifdef POWERBANKGUARD
+#define powerBankGuardPin 5 // D5
+#define powerBankGuardInterval 18000000 // 18s
+#define powerBankGuardPulseWidth 1 // 1ms
+#endif
+
 #define LONG_PRESS 1000
 
 Button pauseButton(buttonPause);
@@ -721,6 +729,14 @@ void waitForTrackToFinish() {
 void setup() {
 
   Serial.begin(115200); // Es gibt ein paar Debug Ausgaben über die serielle Schnittstelle
+
+  // power bank guard
+#ifdef POWERBANKGUARD
+  pinMode(powerBankGuardPin, OUTPUT);
+  digitalWrite(powerBankGuardPin, 0);
+  Timer1.initialize(powerBankGuardInterval);
+  Timer1.attachInterrupt(powerBankTimerIsrHandler);
+#endif
 
   // Wert für randomSeed() erzeugen durch das mehrfache Sammeln von rauschenden LSBs eines offenen Analogeingangs
   uint32_t ADC_LSB;
@@ -795,6 +811,16 @@ void setup() {
   // Start Shortcut "at Startup" - e.g. Welcome Sound
   playShortCut(3);
 }
+
+#ifdef POWERBANKGUARD
+void powerBankTimerIsrHandler()
+{
+  // set pulse, wait, reset pulse
+  digitalWrite(powerBankGuardPin, 1);
+  delay(powerBankGuardPulseWidth);
+  digitalWrite(powerBankGuardPin, 0);
+}
+#endif
 
 void readButtons() {
   pauseButton.read();
