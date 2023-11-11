@@ -20,6 +20,11 @@
 
 // uncomment the below line to enable five button support
 #define FIVEBUTTONS
+// Power bank guard prevents the power bank to switch off due to 
+// small load current. A digital output is pulsed for that purpose.
+// Define pin, interval time and pulse width below
+// --> connect output to NPN transistor switching a load that meets
+//     the power bank's threshold
 #define POWERBANKGUARD
 
 static const uint32_t cardCookie = 322417479;
@@ -706,6 +711,7 @@ void checkStandbyAtMillis() {
 
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     cli();  // Disable interrupts
+    // powerbank guard pulse is stopped with disabling iterrupts
     sleep_mode();
   }
 }
